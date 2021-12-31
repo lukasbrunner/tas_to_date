@@ -282,9 +282,9 @@ def load_plot_all(
         ds_cum.to_netcdf(fn)
 
     if produce_gif:
-        combine_to_gif(get_filename(ds, 'daily', save_format))
-        combine_to_gif(get_filename(ds_cum, 'cummean', save_format))
-        combine_to_gif(get_filename(ds, 'both', save_format))
+        combine_to_gif(get_filename(ds, 'daily', save_format), overwrite=overwrite)
+        combine_to_gif(get_filename(ds_cum, 'cummean', save_format), overwrite=overwrite)
+        combine_to_gif(get_filename(ds, 'both', save_format), overwrite=overwrite)
 
     return (
         get_filename(ds, 'daily', save_format),
@@ -295,7 +295,7 @@ def load_plot_all(
 def combine_to_gif(
         fn: str,
         stepsize: int='auto',
-        delay: int=50,
+        delay: int=40,
         resize: int=640,
         overwrite=False):
     """Combine individual figures to gif.
