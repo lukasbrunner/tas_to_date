@@ -24,6 +24,7 @@ map_names = {
     'global': 'Global',
     'global-land': 'Global (Land)',
     'europe-land': 'in Europa (Land)',
+    'europe': 'in Europa',
     'wce-land': 'in Zentraleuropa',
     'austria': 'in Österreich',
 }
