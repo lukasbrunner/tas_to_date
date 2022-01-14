@@ -20,8 +20,8 @@ parser = argparse.ArgumentParser(
     formatter_class=argparse.RawDescriptionHelpFormatter)
 
 parser.add_argument(
-    dest='year', nargs='?', default=2021, type=int,
-    help='Year to process (by default 2021)')
+    dest='year', nargs='?', default=2022, type=int,
+    help='Year to process (by default 2022)')
 parser.add_argument(
     '--regions', '-r', dest='regions', nargs='+', default=regions, type=str,
         help='Regions to process (by default all available regions)')

@@ -27,13 +27,14 @@ from .utilities import (
 )
 
 mpl.rc('font', size=20)
-plt.rcParams.update({
-    "text.usetex": True,
-    "font.family": "sans-serif",
-    "font.sans-serif": ["Helvetica"]})
+# DEBUG: RuntimeError: Failed to process string with tex because latex could not be found
+# plt.rcParams.update({
+#     "text.usetex": True,
+#     "font.family": "sans-serif",
+#     "font.sans-serif": ["Helvetica"]})
 
-load_path = '/net/xenon/climphys/lukbrunn/data'
-plot_path = '/net/h2o/climphys/lukbrunn/Data/year_to_day/percentiles/plots'
+load_path = '/scratch/shared/ERA5/'
+plot_path = '../figures'
 
 data_path = '../data'
 fn_pattern = 'tas_preprocessed_{region}.nc'
@@ -102,12 +103,13 @@ def load_year_current(region: str) -> xr.DataArray:
 
 def add_target_year(ds_base: xr.Dataset,  year: int,) -> xr.Dataset:
     """Extract of load target year and add it as separate variable."""
-    if year == ds_base['year'].values[-1] + 1:  # current year (not in sample)
-        da = load_year_current(ds_base.attrs['region'])
-        doy = da['dayofyear'].values[np.isfinite(da)][-1]
-    else:  # past year (in sample)
+    try:
         da = ds_base.sel(year=year, drop=True)['tas_base']
         doy = 365
+    except KeyError:
+        da = load_year_current(ds_base.attrs['region'])
+        # TODO: I think doy is always just index+1 right?
+        doy = da['dayofyear'].values[np.where(np.isfinite(da.values))[0][-1]]
 
     da.name = 'tas'
     ds_base.attrs['year'] = year
