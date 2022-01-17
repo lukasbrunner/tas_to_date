@@ -24,7 +24,10 @@ parser.add_argument(
     help='Year to process (by default 2022)')
 parser.add_argument(
     '--regions', '-r', dest='regions', nargs='+', default=regions, type=str,
-        help='Regions to process (by default all available regions)')
+    help='Regions to process (by default all available regions)')
+parser.add_argument(
+    '--overwrite', '-o', dest='overwrite', action='store_true',
+    help='Overwrite existing plot files')
 args = parser.parse_args()
 
 year = args.year
@@ -37,6 +40,7 @@ for region in args.regions:
     fn_daily, fn_cummean, fn_both = load_plot_all(
         region=region,
         year=year,
+        overwrite=args.overwrite,
     )
 
     combine_to_gif(fn_daily, stepsize=1, delay=10)
