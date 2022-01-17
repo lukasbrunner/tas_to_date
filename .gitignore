@@ -1,6 +1,11 @@
 # Twitter
 secret.py
 
+# figures
+figures/
+!figures/austria/2020/daily
+!figures/austria/2020/cummean
+
 # emacs backup
 *~
 
