@@ -135,7 +135,7 @@ def plot_target(
 def mark_max(
         ax: plt.Axes,
         ds: xr.Dataset,
-        always: bool=True
+        always: bool=False
 ) -> None:
     """Indicate days with where the year has the maximum value."""
     max_ = ds['tas'] >= ds['tas_base'].max('year')
@@ -288,7 +288,8 @@ def plot_main(ds: xr.Dataset, ax: plt.Axes=None, dpi_ratio: float=1.2):
     if ax is None:
         fig, ax = plt.subplots(figsize=(16/dpi_ratio, 9/dpi_ratio), dpi=75*dpi_ratio)
     h1 = plot_base(ax, ds)
-    show_record = True if bool(ds.attrs.get('cummean', False)) else 'always'
+    # show_record = True if bool(ds.attrs.get('cummean', False)) else 'always'
+    show_record = True
     h2 = plot_target(ax, ds, show_record=show_record)
     plot_legend(ax, [h1, h2], ds)
     plot_ccby(ax, ds)
