@@ -1,5 +1,7 @@
 # tas to date
 
+<a href="https://twitter.com/tas_to_date">View o **Twitter**.</a>
+
 **Idea.** The name tas to date is a combination of the common variable name `tas` for near-surface air temperature in climate models and the concept of <a href="https://en.wiktionary.org/wiki/year-to-date" target="_blanck">year-to-date</a> relating to the period from the beginning of the year to a set point during the year.
 
 **Description.** The collection of scripts in this repository mainly creates two kinds of plots
@@ -11,13 +13,13 @@
 
 **Basic Usage.** For pre-processed data (also termed in sample data) covering the years 1950-2020 the `main.py` script should work out of the box if all required packages are installed. Just run
 
-```python
+```bash
 python main.py -h
 ```
 
 for a list of possible parameters. The default year is the current year, so for the basic version this needs to be set to a non-default value. By default the script will currently create plots for all days of the year and all regions, which is quite a few files. Regions can manually be included using the `-r` flag repeatedly. Possible regions currently are: 'global', 'global-land', 'europe', 'europe-land', 'wce-land' (Western Central Europe), and 'austria'. For example try:
 
-```python
+```bash
 python main 2020 -r global
 ```
 
