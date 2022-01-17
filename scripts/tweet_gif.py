@@ -31,7 +31,7 @@ from secret import (
     access_token, access_token_secret
 )
 
-gif_config = 'stepsize-auto_delay-50_size-640'
+gif_config = 'stepsize-auto_delay-40_size-640'
 
 def parse_input():
     parser = argparse.ArgumentParser(
@@ -65,7 +65,6 @@ def tweet(fn, text):
 
 def get_date(fn, year):
     doy = int(os.path.splitext(fn)[0].replace(gif_config, '').split('_')[-2])
-    print(fn, doy)
     date = datetime.strptime(f'{year}-{doy:03d}', '%Y-%j')
     return date.strftime('%A %-d. %B %Y')
 
