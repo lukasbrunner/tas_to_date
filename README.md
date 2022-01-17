@@ -7,6 +7,7 @@
 - timeseries of daily cumulative (year-to-date) mean temperature also compared to the climatology. Cumulative mean temperature is the temperature from January 1st until each day during a year. So for January 1st it is equivalent to daily temperature by definition and for December 31st it is equivalent to annual mean temperature.
 
 <img src="figures/austria/2022/daily/tas_daily_austria_2022_007.jpg" width="80%" height="80%"><br>
+<img src="figures/austria/2022/cummean/tas_cummean_austria_2022_007.jpg" width="80%" height="80%"><br>
 
 **Basic Usage.** For pre-processed data (also termed in sample data) covering the years 1950-2020 the `main.py` script should work out of the box if all required packages are installed. Just run
 
