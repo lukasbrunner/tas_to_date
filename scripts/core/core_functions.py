@@ -11,27 +11,22 @@ Abstract: Main functions for calculating time-series of cumulative
 temperature in different regions.
 """
 import os
-import numpy as np
-import xarray as xr
 from glob import glob
-from time import sleep
-import matplotlib as mpl
-import matplotlib.pyplot as plt
 from typing import List
 
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+import numpy as np
+import xarray as xr
+
 from .plot_functions import plot_main
-from .utilities import (
-    average_region,
-    kelvin_to_centigrade,
-    time_to_dayofyear,
-)
+from .utilities import average_region, kelvin_to_centigrade, time_to_dayofyear
 
 mpl.rc('font', size=20)
-# DEBUG: RuntimeError: Failed to process string with tex because latex could not be found
-# plt.rcParams.update({
-#     "text.usetex": True,
-#     "font.family": "sans-serif",
-#     "font.sans-serif": ["Helvetica"]})
+plt.rcParams.update({
+    "text.usetex": True,
+    "font.family": "sans-serif",
+    "font.sans-serif": ["Helvetica"]})
 
 load_path = '/scratch/shared/ERA5/'
 plot_path = '../figures'
@@ -121,7 +116,7 @@ def calc_rank(ds: xr.Dataset) -> xr.Dataset:
     """Calculate the rank of the target year and add it as variable."""
     ds.load()
     year = ds.attrs['year']
-    if year == ds['year'].values[-1] + 1:  # out of sample need to add it first
+    if year > ds['year'].values[-1]:  # out of sample need to add it first
         da = ds['tas'].expand_dims({'year': [ds.attrs['year']]})
         da = xr.concat([ds['tas_base'], da], dim='year')
     else:
@@ -237,11 +232,12 @@ def load_plot_all(
     ds = calc_rank(ds)
     ds_cum = calc_rank(ds_cum)
 
-
     last_doy = ds.attrs['last_doy']
     for doy in range(1, last_doy + 1):
-        if doy % 50 == 0:
-            print(f'Plotting day of year: {doy}')
+        print_nr = 10
+        print_denom = last_doy // print_nr + 1
+        if doy % print_denom == 0:
+            print(f'Processing day of year: {doy}')
         ds_sel = set_last_doy(ds, doy)
         ds_cum_sel = set_last_doy(ds_cum, doy)
 

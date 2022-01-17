@@ -51,7 +51,6 @@ def plot_base(
     last_doy = ds.attrs['last_doy']
     doys = ds['dayofyear'].values
 
-
     for q1, q2 in q_ranges:
         hh = ax.fill_between(
             doys,
@@ -128,9 +127,8 @@ def plot_target(
     [h2] = ax.plot(ds['dayofyear'], ds['tas'], color='darkred')
     if show_record is not None:
         mark_max(ax, ds, show_record=='always')
-    # DEBUG
-    # if show_rank:
-    #     annotate_last_day(ax, ds)
+    if show_rank:
+        annotate_last_day(ax, ds)
     return h2
 
 
@@ -166,7 +164,6 @@ def annotate_last_day(
     ds_last = ds.sel(dayofyear=doy_last, drop=True)
     middle = ds_last['tas_base'].median('year').values  # TODO: add mean
 
-    breakpoint()
     rank_last = ds_last['rank'].sel(year=year).values
     rank_total = ds_last['year'].size
     anom_last = (ds_last['tas'] - middle).values
