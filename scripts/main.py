@@ -16,31 +16,43 @@ from core.core_functions import combine_to_gif, load_plot_all
 from core.utilities import regions
 
 parser = argparse.ArgumentParser(
-    description=__doc__,
-    formatter_class=argparse.RawDescriptionHelpFormatter)
+    description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+)
 
 parser.add_argument(
-    dest='year', nargs='?', default=2022, type=int,
-    help='Year to process (by default 2022)')
+    dest="year",
+    nargs="?",
+    default=2022,
+    type=int,
+    help="Year to process (by default 2022)",
+)
 parser.add_argument(
-    '--regions', '-r', dest='regions', nargs='+', default=regions, type=str,
-    help='Regions to process (by default all available regions)')
+    "--regions",
+    "-r",
+    dest="regions",
+    nargs="+",
+    default=regions,
+    type=str,
+    help="Regions to process (by default all available regions)",
+)
 parser.add_argument(
-    '--overwrite', '-o', dest='overwrite', action='store_true',
-    help='Overwrite existing plot files')
+    "--overwrite",
+    "-o",
+    dest="overwrite",
+    action="store_true",
+    help="Overwrite existing plot files",
+)
 args = parser.parse_args()
 
 year = args.year
-print(f'{year=}')
+print(f"{year=}")
 
 for region in args.regions:
-    print('')
-    print(f'{region=}')
-    print('-' * 20)
+    print("")
+    print(f"{region=}")
+    print("-" * 20)
     fn_daily, fn_cummean, fn_both = load_plot_all(
-        region=region,
-        year=year,
-        overwrite=args.overwrite,
+        region=region, year=year, overwrite=args.overwrite,
     )
 
     combine_to_gif(fn_daily, stepsize=1, delay=10)

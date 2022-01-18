@@ -26,31 +26,30 @@ locale.setlocale(locale.LC_TIME, locale.normalize("de"))
 
 from core.core_functions import plot_path
 from core.plot_functions import map_names
-from secret import (access_token, access_token_secret, consumer_key,
-                    consumer_key_secret)
+from secret import access_token, access_token_secret, consumer_key, consumer_key_secret
 
-gif_config = 'stepsize-auto_delay-40_size-640'
+gif_config = "stepsize-auto_delay-40_size-640"
+
 
 def parse_input():
     parser = argparse.ArgumentParser(
-        description=__doc__,
-        formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument(dest='region', type=str)
-    parser.add_argument(
-        dest='type', type=str, choices=['daily', 'cummean'])
-    parser.add_argument(dest='year', nargs='?', type=str, default='2022')
-    parser.add_argument(dest='doy', nargs='?', type=str, default='*')
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    parser.add_argument(dest="region", type=str)
+    parser.add_argument(dest="type", type=str, choices=["daily", "cummean"])
+    parser.add_argument(dest="year", nargs="?", type=str, default="2022")
+    parser.add_argument(dest="doy", nargs="?", type=str, default="*")
     return parser.parse_args()
 
 
 def get_filename(cummean, region, year, doy):
-    fn = '_'.join(['tas', cummean, region, year, doy, gif_config])
-    fn = os.path.join(plot_path, region, year, fn + '.gif')
-    if doy == '*':
+    fn = "_".join(["tas", cummean, region, year, doy, gif_config])
+    fn = os.path.join(plot_path, region, year, fn + ".gif")
+    if doy == "*":
         return glob(fn)[-1]
 
     if not os.path.isfile(fn):
-        raise IOError(f'File not found: {fn}')
+        raise IOError(f"File not found: {fn}")
     return fn
 
 
@@ -61,19 +60,20 @@ def tweet(fn, text):
     media = api.media_upload(fn)
     post_result = api.update_status(status=text, media_ids=[media.media_id])
 
+
 def get_date(fn, year):
-    doy = int(os.path.splitext(fn)[0].replace(gif_config, '').split('_')[-2])
-    date = datetime.strptime(f'{year}-{doy:03d}', '%Y-%j')
-    return date.strftime('%A %-d. %B %Y')
+    doy = int(os.path.splitext(fn)[0].replace(gif_config, "").split("_")[-2])
+    date = datetime.strptime(f"{year}-{doy:03d}", "%Y-%j")
+    return date.strftime("%A %-d. %B %Y")
 
 
 def get_text(date, region, type_):
     region = map_names[region]
 
-    if type_ == 'daily':
-        return f'Temperaturverlauf {region} bis {date}'
-    elif type_ == 'cummean':
-        return f'Kummulativer Temperaturverlauf {region} bis {date}'
+    if type_ == "daily":
+        return f"Temperaturverlauf {region} bis {date}"
+    elif type_ == "cummean":
+        return f"Kummulativer Temperaturverlauf {region} bis {date}"
 
 
 def main():
@@ -84,5 +84,5 @@ def main():
     tweet(fn, text)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
