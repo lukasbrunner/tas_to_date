@@ -10,26 +10,25 @@ Authors:
 Abstract:
 
 """
-import os
 import argparse
-import tweepy
 import base64
-import requests
-import regionmask
-import numpy as np
-from glob import glob
+import locale
+import os
 from datetime import datetime
 from glob import glob
-import locale
+
+import numpy as np
+import regionmask
+import requests
+import tweepy
+
 locale.setlocale(locale.LC_TIME, locale.normalize("de"))
 
 from core.core_functions import plot_path
 from core.plot_functions import map_names
+from secret import (access_token, access_token_secret, consumer_key,
+                    consumer_key_secret)
 
-from secret import (
-    consumer_key, consumer_key_secret,
-    access_token, access_token_secret
-)
 
 def parse_input():
     parser = argparse.ArgumentParser(

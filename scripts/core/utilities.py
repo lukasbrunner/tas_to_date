@@ -1,9 +1,10 @@
-import dask
-import regionmask
-import numpy as np
-import xarray as xr
 import warnings
 from datetime import datetime
+
+import dask
+import numpy as np
+import regionmask
+import xarray as xr
 
 regions = {
     'global': {'region': 'global'},

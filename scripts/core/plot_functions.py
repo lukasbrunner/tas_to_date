@@ -9,16 +9,14 @@ Authors:
 
 Abstract: A collection of plotting functions.
 """
-import xarray as xr
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
-from matplotlib.offsetbox import (
-    OffsetImage, AnnotationBbox,
-)
-
-from typing import Tuple, List
 from datetime import datetime
+from typing import List, Tuple
+
+import matplotlib.image as mpimg
+import matplotlib.pyplot as plt
+import numpy as np
+import xarray as xr
+from matplotlib.offsetbox import AnnotationBbox, OffsetImage
 
 map_names = {
     'global': 'Global',

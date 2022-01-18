@@ -10,8 +10,8 @@ Authors:
 Abstract:
 
 """
-from core_functions import preprocess_region
-from utilities import regions
+from core.core_functions import preprocess_region
+from core.utilities import regions
 
 for region in regions:
     preprocess_region(region)

@@ -12,7 +12,7 @@ Abstract:
 """
 import argparse
 
-from core.core_functions import load_plot_all, combine_to_gif
+from core.core_functions import combine_to_gif, load_plot_all
 from core.utilities import regions
 
 parser = argparse.ArgumentParser(
