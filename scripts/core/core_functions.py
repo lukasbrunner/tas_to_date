@@ -242,13 +242,13 @@ def load_plot_all(
         fn = get_filename(ds_sel, "daily", save_format)
         if overwrite or not os.path.isfile(fn):
             plot_main(ds_sel, dpi_ratio=dpi_ratio)
-            plt.savefig(fn, dpi=72)
+            plt.savefig(fn, dpi=150)
             plt.close()
 
         fn = get_filename(ds_cum_sel, "cummean", save_format)
         if overwrite or not os.path.isfile(fn):
             plot_main(ds_cum_sel, dpi_ratio=dpi_ratio)
-            plt.savefig(fn, dpi=72)
+            plt.savefig(fn, dpi=150)
             plt.close()
 
         fn = get_filename(ds_sel, "both", save_format)
@@ -258,7 +258,7 @@ def load_plot_all(
             )
             plot_main(ds_sel, ax=ax1)
             plot_main(ds_cum_sel, ax=ax2)
-            plt.savefig(fn, dpi=72)
+            plt.savefig(fn, dpi=150)
             plt.close()
 
     fn = get_filename(ds, "daily", ".nc")
