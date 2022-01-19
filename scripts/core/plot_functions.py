@@ -101,7 +101,7 @@ def plot_base(
                 0.4,
                 "\n".join(
                     [
-                        "\\textbf{Kumuliative Mitteltemperatur}",
+                        "\\textbf{Kumulative Mitteltemperatur}",
                         "Mittlere Temperatur vom 1. Jännner",
                         "bis zum angegebenen Tag",
                     ]
@@ -310,7 +310,7 @@ def plot_main(ds: xr.Dataset, ax: plt.Axes = None, dpi_ratio: float = 1.2):
     """Main plotting function. Calls relevant subfunctions."""
     if ax is None:
         fig, ax = plt.subplots(
-            figsize=(16 / dpi_ratio, 9 / dpi_ratio), dpi=75 * dpi_ratio
+            figsize=(16 / dpi_ratio, 9 / dpi_ratio), dpi=150 * dpi_ratio
         )
     h1 = plot_base(ax, ds)
     # show_record = True if bool(ds.attrs.get('cummean', False)) else 'always'

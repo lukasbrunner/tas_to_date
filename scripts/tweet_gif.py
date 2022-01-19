@@ -73,7 +73,7 @@ def get_text(date, region, type_):
     if type_ == "daily":
         return f"Temperaturverlauf {region} bis {date}"
     elif type_ == "cummean":
-        return f"Kummulativer Temperaturverlauf {region} bis {date}"
+        return f"Kumulativer Temperaturverlauf {region} bis {date}"
 
 
 def main():

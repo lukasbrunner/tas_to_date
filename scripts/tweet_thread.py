@@ -28,12 +28,12 @@ from core.core_functions import plot_path
 from core.plot_functions import map_names
 from secret import access_token, access_token_secret, consumer_key, consumer_key_secret
 
+REGIONS = ['austria', 'wce-land', 'europe', 'global']
 
 def parse_input():
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
-    parser.add_argument(dest="region", type=str)
     parser.add_argument(dest="type", type=str, choices=["daily", "cummean"])
     parser.add_argument(dest="year", nargs="?", type=str, default="2022")
     parser.add_argument(dest="doy", nargs="?", type=str, default="*")
@@ -51,12 +51,17 @@ def get_filename(cummean, region, year, doy):
     return fn
 
 
-def tweet(fn, text):
+def tweet(fn, text, reply=None):
     auth = tweepy.OAuthHandler(consumer_key, consumer_key_secret)
     auth.set_access_token(access_token, access_token_secret)
     api = tweepy.API(auth)
     media = api.media_upload(fn)
-    post_result = api.update_status(status=text, media_ids=[media.media_id])
+    return api.update_status(
+        status=text,
+        media_ids=[media.media_id],
+        in_reply_to_status_id=reply,
+        auto_populate_reply_metadata=reply is not None,
+    ).id
 
 
 def get_date(fn, year):
@@ -76,10 +81,15 @@ def get_text(date, region, type_):
 
 def main():
     args = parse_input()
-    fn = get_filename(args.type, args.region, args.year, args.doy)
+    fn = get_filename(args.type, REGIONS[0], args.year, args.doy)
     date = get_date(fn, args.year)
-    text = get_text(date, args.region, args.type)
-    tweet(fn, text)
+    text = get_text(date, REGIONS[0], args.type)
+    id_ = tweet(fn, text)
+
+    for region in REGIONS[1:]:
+        fn = get_filename(args.type, region, args.year, args.doy)
+        text = get_text(date, region, args.type)
+        id_ = tweet(fn, text, reply=id_)
 
 
 if __name__ == "__main__":
