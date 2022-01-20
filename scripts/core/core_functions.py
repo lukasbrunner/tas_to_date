@@ -293,7 +293,7 @@ def load_plot_all(
 
 
 def combine_to_gif(
-    fn: str, stepsize: int = "auto", delay: int = 40, resize: int = 640, overwrite=False
+    fn: str, stepsize: int = "auto", delay: int = 40, resize: int = 1000, overwrite=False
 ):
     """Combine individual figures to gif.
 
@@ -318,7 +318,7 @@ def combine_to_gif(
 
     filenames = glob(os.path.join(path, f"*{ext}"))
     if stepsize == "auto":
-        stepsize = len(filenames) // 100 + 1
+        stepsize = len(filenames) // 180 + 1
     filenames = " ".join(filenames[::stepsize])
 
     if overwrite or not os.path.isfile(fn):
