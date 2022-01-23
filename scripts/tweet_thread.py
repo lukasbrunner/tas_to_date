@@ -23,7 +23,7 @@ from core.plot_functions import map_names
 from secret import access_token, access_token_secret, consumer_key, consumer_key_secret
 
 locale.setlocale(locale.LC_TIME, locale.normalize("de"))
-REGIONS = ["austria", "wce-land", "europe", "global"]
+REGIONS = ["austria", "europe", "global"]
 
 
 def parse_input():
