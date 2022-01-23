@@ -23,7 +23,7 @@ from core.plot_functions import map_names
 from secret import access_token, access_token_secret, consumer_key, consumer_key_secret
 
 locale.setlocale(locale.LC_TIME, locale.normalize("de"))
-gif_config = "stepsize-auto_delay-40_size-640"
+gif_config = "stepsize-auto_delay-40_size-1000"
 
 
 def parse_input():
