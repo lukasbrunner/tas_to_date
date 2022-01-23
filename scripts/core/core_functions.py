@@ -27,10 +27,10 @@ plt.rcParams.update(
     {"text.usetex": True, "font.family": "sans-serif", "font.sans-serif": ["Helvetica"]}
 )
 
+current_path = os.path.dirname(os.path.abspath(__file__))
 load_path = "/scratch/shared/ERA5/"
-plot_path = "../figures"
-
-data_path = "../data"
+plot_path = os.path.join(current_path, "../../figures")
+data_path = os.path.join(current_path, "../../data")
 fn_pattern = "tas_preprocessed_{region}.nc"
 
 
@@ -215,6 +215,7 @@ def load_plot_all(
     save_format: str = ".jpg",
     overwrite=False,
     produce_gif=True,
+    language="german",
 ) -> List[str]:
     """Main function. Loops over all possible days.
 
@@ -241,13 +242,13 @@ def load_plot_all(
 
         fn = get_filename(ds_sel, "daily", save_format)
         if overwrite or not os.path.isfile(fn):
-            plot_main(ds_sel, dpi_ratio=dpi_ratio)
+            plot_main(ds_sel, dpi_ratio=dpi_ratio, language=language)
             plt.savefig(fn, dpi=150)
             plt.close()
 
         fn = get_filename(ds_cum_sel, "cummean", save_format)
         if overwrite or not os.path.isfile(fn):
-            plot_main(ds_cum_sel, dpi_ratio=dpi_ratio)
+            plot_main(ds_cum_sel, dpi_ratio=dpi_ratio, language=language)
             plt.savefig(fn, dpi=150)
             plt.close()
 
@@ -256,8 +257,8 @@ def load_plot_all(
             fig, (ax1, ax2) = plt.subplots(
                 2, figsize=(16 / dpi_ratio, 18 / dpi_ratio), dpi=75 * dpi_ratio
             )
-            plot_main(ds_sel, ax=ax1)
-            plot_main(ds_cum_sel, ax=ax2)
+            plot_main(ds_sel, ax=ax1, language=language)
+            plot_main(ds_cum_sel, ax=ax2, language=language)
             plt.savefig(fn, dpi=150)
             plt.close()
 
@@ -293,7 +294,11 @@ def load_plot_all(
 
 
 def combine_to_gif(
-    fn: str, stepsize: int = "auto", delay: int = 40, resize: int = 1000, overwrite=False
+    fn: str,
+    stepsize: int = "auto",
+    delay: int = 40,
+    resize: int = 1000,
+    overwrite=False,
 ):
     """Combine individual figures to gif.
 

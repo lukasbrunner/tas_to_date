@@ -27,6 +27,15 @@ map_names = {
     "austria": "in Österreich",
 }
 
+map_names_en = {
+    "global": "global",
+    "global-land": "global (land)",
+    "europe-land": "in Europe (land)",
+    "europe": "in Europe",
+    "wce-land": "in Central Europe",
+    "austria": "in Austria",
+}
+
 
 def plot_base(
     ax: plt.Axes,
@@ -112,11 +121,40 @@ def plot_base(
                 transform=ax.transAxes,
             )
     else:
-        ax.set_xlabel("Day of the year")
-        ax.set_ylabel("Surface Air Temperature ($^\\circ$C)")
-
+        ax.set_ylabel("Temperature ($^\\circ$C)")
+        ax.set_xticklabels(
+            ["1. Jan.", "1. Mar.", "1. May", "1. Jul.", "1. Sep", "1. Nov.", "31. Dec."]
+        )
+        if year is not None and last_doy is not None and region is not None:
+            date = datetime.strptime(f"{year}-{last_doy}", "%Y-%j").strftime("%d.%m.%Y")
+            if cummean:
+                ax.set_title(
+                    "Cumulative mean temperature {} to {}".format(
+                        map_names_en[region], date
+                    )
+                )
+            else:
+                ax.set_title(
+                    "Daily mean temperature {} to {}".format(map_names_en[region], date)
+                )
+        if cummean:
+            ax.text(
+                0.99,
+                0.4,
+                "\n".join(
+                    [
+                        "\\textbf{Cumulative mean temperature}",
+                        "Mean temperature from January 1$^\\textnormal{st}$",
+                        "until the indicated day",
+                    ]
+                ),
+                ha="right",
+                va="top",
+                fontsize="small",
+                transform=ax.transAxes,
+            )
     if annotate:
-        annotate_shading(ax, ds["tas_base"])
+        annotate_shading(ax, ds["tas_base"], german)
 
     return hh
 
@@ -147,15 +185,17 @@ def plot_target(
     """
     [h2] = ax.plot(ds["dayofyear"], ds["tas"], color="darkred")
     if show_record is not None:
-        mark_max(ax, ds, show_record == "always")
+        mark_record(ax, ds, show_record == "always")
     if show_rank:
         annotate_last_day(ax, ds)
     return h2
 
 
-def mark_max(ax: plt.Axes, ds: xr.Dataset, always: bool = False) -> None:
+def mark_record(ax: plt.Axes, ds: xr.Dataset, always: bool = False) -> None:
     """Indicate days with where the year has the maximum value."""
     max_ = ds["tas"] >= ds["tas_base"].max("year")
+    # min_ = ds["tas"] <= ds["tas_base"].min("year")
+    # record = np.logical_or(max_, min_)
     y_min = ds["tas_base"].min()  # for line placement
     if np.any(max_) or always:
         max_ = (max_.where(max_) * 0) + y_min
@@ -163,7 +203,7 @@ def mark_max(ax: plt.Axes, ds: xr.Dataset, always: bool = False) -> None:
         ax.text(
             33,
             y_min,
-            "Tage mit Rekord: {}/{}".format(
+            "Tage mit Hitzerekord: {}/{}".format(
                 np.isfinite(max_).sum().values, np.isfinite(ds["tas"]).sum().values
             ),
             va="bottom",
@@ -182,6 +222,8 @@ def annotate_last_day(ax: plt.Axes, ds: xr.Dataset) -> None:
     rank_last = ds_last["rank"].sel(year=year).values
     rank_total = ds_last["year"].size
     anom_last = (ds_last["tas"] - middle).values
+
+    # print(middle)
 
     text = f"{anom_last:+.1f}$^\\circ$C\n{rank_last}/{rank_total}"
 
@@ -211,7 +253,7 @@ def annotate_last_day(ax: plt.Axes, ds: xr.Dataset) -> None:
     )
 
 
-def annotate_shading(ax: plt.Axes, da: xr.DataArray) -> None:
+def annotate_shading(ax: plt.Axes, da: xr.DataArray, german: bool) -> None:
     """Add an explainer about the meaning of the shading.
 
     Parameters
@@ -219,29 +261,43 @@ def annotate_shading(ax: plt.Axes, da: xr.DataArray) -> None:
     ax : plt.Axes
     da : xr.DataArray
     """
-    # # upper percentile
-    # doy = 90  # target possition
-    # y_pos = da.sel(dayofyear=doy).quantile(.98, 'year')
-    # ax.annotate(
-    #     '10\\,\\% wärmste Jahre',
-    #     (doy, y_pos),
-    #     (30, da.sel(dayofyear=doy + 30).max().values),
-    #     verticalalignment='center',
-    #     arrowprops={'arrowstyle': '->'}, fontsize='small',
-    # )
+    if german:
+        # # upper percentile
+        # doy = 90  # target possition
+        # y_pos = da.sel(dayofyear=doy).quantile(.98, 'year')
+        # ax.annotate(
+        #     '10\\,\\% wärmste Jahre',
+        #     (doy, y_pos),
+        #     (30, da.sel(dayofyear=doy + 30).max().values),
+        #     verticalalignment='center',
+        #     arrowprops={'arrowstyle': '->'}, fontsize='small',
+        # )
 
-    # lower percentile
-    doy = 120
-    y_pos = da.sel(dayofyear=doy).quantile(0.02, "year").values
-    ax.annotate(
-        "10\\,\\% kälteste Jahre",
-        (doy, y_pos),
-        (150, da.sel(dayofyear=doy).min().values),
-        verticalalignment="center",
-        horizontalalignment="left",
-        arrowprops={"arrowstyle": "->", "relpos": (0.5, 0.5)},
-        fontsize="small",
-    )
+        # lower percentile
+        doy = 120
+        y_pos = da.sel(dayofyear=doy).quantile(0.02, "year").values
+        ax.annotate(
+            "10\\,\\% kälteste Jahre",
+            (doy, y_pos),
+            (150, da.sel(dayofyear=doy).min().values),
+            verticalalignment="center",
+            horizontalalignment="left",
+            arrowprops={"arrowstyle": "->", "relpos": (0.5, 0.5)},
+            fontsize="small",
+        )
+    else:
+        # lower percentile
+        doy = 120
+        y_pos = da.sel(dayofyear=doy).quantile(0.02, "year").values
+        ax.annotate(
+            "10\\,\\% coldest years",
+            (doy, y_pos),
+            (150, da.sel(dayofyear=doy).min().values),
+            verticalalignment="center",
+            horizontalalignment="left",
+            arrowprops={"arrowstyle": "->", "relpos": (0.5, 0.5)},
+            fontsize="small",
+        )
 
 
 def plot_ccby(ax: plt.Axes, ds: xr.Dataset, twitter_handle: bool = True,) -> None:
@@ -306,13 +362,18 @@ def plot_legend(ax: plt.Axes, handles: list, ds: xr.Dataset):
     ax.legend(handles, [years, ds.attrs["year"]], loc="upper left")
 
 
-def plot_main(ds: xr.Dataset, ax: plt.Axes = None, dpi_ratio: float = 1.2):
+def plot_main(
+    ds: xr.Dataset,
+    ax: plt.Axes = None,
+    dpi_ratio: float = 1.2,
+    language: str = "german",
+):
     """Main plotting function. Calls relevant subfunctions."""
     if ax is None:
         fig, ax = plt.subplots(
             figsize=(16 / dpi_ratio, 9 / dpi_ratio), dpi=150 * dpi_ratio
         )
-    h1 = plot_base(ax, ds)
+    h1 = plot_base(ax, ds, german=language == "german")
     # show_record = True if bool(ds.attrs.get('cummean', False)) else 'always'
     show_record = True
     h2 = plot_target(ax, ds, show_record=show_record)

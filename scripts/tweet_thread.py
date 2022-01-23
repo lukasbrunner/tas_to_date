@@ -11,24 +11,20 @@ Abstract:
 
 """
 import argparse
-import base64
 import locale
 import os
 from datetime import datetime
 from glob import glob
 
-import numpy as np
-import regionmask
-import requests
 import tweepy
-
-locale.setlocale(locale.LC_TIME, locale.normalize("de"))
 
 from core.core_functions import plot_path
 from core.plot_functions import map_names
 from secret import access_token, access_token_secret, consumer_key, consumer_key_secret
 
-REGIONS = ['austria', 'wce-land', 'europe', 'global']
+locale.setlocale(locale.LC_TIME, locale.normalize("de"))
+REGIONS = ["austria", "wce-land", "europe", "global"]
+
 
 def parse_input():
     parser = argparse.ArgumentParser(

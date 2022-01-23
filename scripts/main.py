@@ -36,6 +36,15 @@ parser.add_argument(
     help="Regions to process (by default all available regions)",
 )
 parser.add_argument(
+    "--language",
+    "-l",
+    dest="language",
+    type=str,
+    default="german",
+    choices=["german", "english"],
+    help="Select language of plot labels",
+)
+parser.add_argument(
     "--overwrite",
     "-o",
     dest="overwrite",
@@ -52,7 +61,7 @@ for region in args.regions:
     print(f"{region=}")
     print("-" * 20)
     fn_daily, fn_cummean, fn_both = load_plot_all(
-        region=region, year=year, overwrite=args.overwrite,
+        region=region, year=year, overwrite=args.overwrite, language=args.language,
     )
 
     combine_to_gif(fn_daily, stepsize=1, delay=10)
