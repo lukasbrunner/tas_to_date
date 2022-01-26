@@ -9,6 +9,7 @@ Authors:
 
 Abstract: A collection of plotting functions.
 """
+import os
 from datetime import datetime
 from typing import List, Tuple
 
@@ -35,6 +36,8 @@ map_names_en = {
     "wce-land": "in Central Europe",
     "austria": "in Austria",
 }
+
+current_path = os.path.dirname(os.path.abspath(__file__))
 
 
 def plot_base(
@@ -320,7 +323,7 @@ def plot_ccby(ax: plt.Axes, ds: xr.Dataset, twitter_handle: bool = True,) -> Non
         # TODO: update placement
         yy = 0.86
 
-    arr = mpimg.imread("../images/by.png")
+    arr = mpimg.imread(os.path.join(current_path, "../../images/by.png"))
     imagebox = OffsetImage(arr, zoom=0.19)
     ab = AnnotationBbox(
         imagebox,
