@@ -1,6 +1,6 @@
 # tas to date
 
-<a href="https://twitter.com/tas_to_date">View o **Twitter**</a>
+<a href="https://twitter.com/tas_to_date">View on **Twitter**</a>
 
 The name **tas to date** is a combination of the common variable name `tas` for near-surface air temperature and the concept of <a href="https://en.wiktionary.org/wiki/year-to-date" target="_blanck">year-to-date</a> relating to the period from the beginning of the year to a set point during the year.
 
