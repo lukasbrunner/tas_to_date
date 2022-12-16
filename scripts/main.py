@@ -11,6 +11,7 @@ Abstract:
 
 """
 import argparse
+from datetime import datetime
 
 from core.core_functions import combine_to_gif, load_plot_all
 from core.utilities import regions
@@ -22,9 +23,9 @@ parser = argparse.ArgumentParser(
 parser.add_argument(
     dest="year",
     nargs="?",
-    default=2022,
+    default=datetime.now().year,
     type=int,
-    help="Year to process (by default 2022)",
+    help="Year to process (by defaults to current year)",
 )
 parser.add_argument(
     "--regions",
@@ -51,6 +52,14 @@ parser.add_argument(
     action="store_true",
     help="Overwrite existing plot files",
 )
+parser.add_argument(
+    "--show-exceedance",
+    "-e",
+    dest="show_exceedance",
+    type=float,
+    default=1.1,
+    help="If in [-1, 1] show exeedances of given quantile (see docstring for interpretation of negative values)",
+)
 args = parser.parse_args()
 
 year = args.year
@@ -61,7 +70,11 @@ for region in args.regions:
     print(f"{region=}")
     print("-" * 20)
     fn_daily, fn_cummean, fn_both = load_plot_all(
-        region=region, year=year, overwrite=args.overwrite, language=args.language,
+        region=region,
+        year=year,
+        overwrite=args.overwrite,
+        language=args.language,
+        show_exceedance=args.show_exceedance,
     )
 
     combine_to_gif(fn_daily, stepsize=1, delay=10)
