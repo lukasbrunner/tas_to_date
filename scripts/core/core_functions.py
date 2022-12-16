@@ -162,6 +162,7 @@ def load_plot_single(
     dpi_ratio: float = 1.2,
     save: bool = False,
     save_format: str = ".jpg",
+    show_exceedance: float = 1.1,
 ):
     """Like load_plot_all but only for one day. See there for docstring."""
     ds = load_base(region)
@@ -173,8 +174,9 @@ def load_plot_single(
     ds_cum = calc_cummean(ds)
     ds = calc_rank(ds)
     ds_cum = calc_rank(ds_cum)
+    breakpoint()
 
-    plot_main(ds, dpi_ratio=dpi_ratio)
+    plot_main(ds, dpi_ratio=dpi_ratio, show_exceedance=show_exceedance)
     if save:
         fn = get_filename(ds, "daily", "")
         plt.savefig(fn + save_format, dpi=72)
@@ -187,7 +189,7 @@ def load_plot_single(
     plt.show()
     plt.close()
 
-    plot_main(ds_cum, dpi_ratio=dpi_ratio)
+    plot_main(ds_cum, dpi_ratio=dpi_ratio, show_exceedance=show_exceedance)
     if save:
         fn = get_filename(ds_cum, "cummean", "")
         plt.savefig(fn + save_format, dpi=72)
@@ -216,6 +218,7 @@ def load_plot_all(
     overwrite=False,
     produce_gif=True,
     language="german",
+    show_exceedance: float = 1.1,
 ) -> List[str]:
     """Main function. Loops over all possible days.
 
@@ -242,13 +245,13 @@ def load_plot_all(
 
         fn = get_filename(ds_sel, "daily", save_format)
         if overwrite or not os.path.isfile(fn):
-            plot_main(ds_sel, dpi_ratio=dpi_ratio, language=language)
+            plot_main(ds_sel, dpi_ratio=dpi_ratio, language=language, show_exceedance=show_exceedance)
             plt.savefig(fn, dpi=150)
             plt.close()
 
         fn = get_filename(ds_cum_sel, "cummean", save_format)
         if overwrite or not os.path.isfile(fn):
-            plot_main(ds_cum_sel, dpi_ratio=dpi_ratio, language=language)
+            plot_main(ds_cum_sel, dpi_ratio=dpi_ratio, language=language, show_exceedance=show_exceedance)
             plt.savefig(fn, dpi=150)
             plt.close()
 
@@ -257,8 +260,8 @@ def load_plot_all(
             fig, (ax1, ax2) = plt.subplots(
                 2, figsize=(16 / dpi_ratio, 18 / dpi_ratio), dpi=75 * dpi_ratio
             )
-            plot_main(ds_sel, ax=ax1, language=language)
-            plot_main(ds_cum_sel, ax=ax2, language=language)
+            plot_main(ds_sel, ax=ax1, language=language, show_exceedance=show_exceedance)
+            plot_main(ds_cum_sel, ax=ax2, language=language, show_exceedance=show_exceedance)
             plt.savefig(fn, dpi=150)
             plt.close()
 

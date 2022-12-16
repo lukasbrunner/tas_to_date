@@ -166,6 +166,7 @@ def plot_target(
     ax: plt.Axes,
     ds: xr.Dataset,
     show_record: Tuple[bool, str] = "always",
+    show_exceedance: float = 1.,
     show_rank: bool = True,
 ) -> "handle":
     """Plot the target year and related information.
@@ -177,7 +178,14 @@ def plot_target(
     show_record : bool or 'always', optional, by default 'always'
         If False do not show days with a new record. If True only show the
         indicator if there is at least one day with a record. If 'always'
-        always show it.
+        always show it. TODO: remove - redundant with 'show_exceedance'
+    show_exceedance : float, optional, by default 1.
+        Several cases are disdinguished:
+          - if absolute value larger than 1 do not show days with exceedances or new records
+          - if exactly 1 show new heat records (default)
+          - if exactly -1 show new cold records
+          - if positive show exceedances of the given quantile
+          - if negative show undercuts of given (absolut value) of quantile
     show_rank : bool, optional, by default True
         Annotate the last day with rank and anomaly.
 
@@ -187,15 +195,17 @@ def plot_target(
         For use in the figure legend.
     """
     [h2] = ax.plot(ds["dayofyear"], ds["tas"], color="darkred")
-    if show_record is not None:
-        mark_record(ax, ds, show_record == "always")
+    # if show_record is not None:
+    #     mark_record(ax, ds, show_record == "always")
+    if np.abs(show_exceedance) <= 1:
+            mark_exceedance(ax, ds, show_exceedance)
     if show_rank:
         annotate_last_day(ax, ds)
     return h2
 
 
 def mark_record(ax: plt.Axes, ds: xr.Dataset, always: bool = False) -> None:
-    """Indicate days with where the year has the maximum value."""
+    """Indicate days where the year has the maximum value."""
     max_ = ds["tas"] >= ds["tas_base"].max("year")
     # min_ = ds["tas"] <= ds["tas_base"].min("year")
     # record = np.logical_or(max_, min_)
@@ -212,6 +222,43 @@ def mark_record(ax: plt.Axes, ds: xr.Dataset, always: bool = False) -> None:
             va="bottom",
         )
         ax.plot(ds["dayofyear"], max_, marker="s", ms=2, ls="none", color="darkred")
+        ds.attrs["show_record"] = "True"
+
+
+def mark_exceedance(ax: plt.Axes, ds: xr.Dataset, quantile: float, always: bool = True) -> None:
+    """Indicate days where the year exceeds a given percentile."""
+    if quantile == 1:
+        threshold = ds["tas"] >= ds["tas_base"].max("year")
+        text = "Tage mit Hitzerekord"
+    elif quantile == -1:
+        threshold = ds["tas"] <= ds["tas_base"].min("year")
+        text = "Tage mit Kälterekord"
+    elif quantile == 0:
+        threshold = ds["tas"] >= ds["tas_base"].min("year")
+        text = "Tage über Minimum"
+    elif quantile > 0:
+        threshold = ds["tas"] >= ds["tas_base"].quantile(quantile, "year")
+        text = "Tage in wärmsten {:.0f}\%".format(quantile * 100)
+    else:
+        threshold = ds["tas"] <= ds["tas_base"].quantile(quantile, "year")
+        text = "Tage in kältesten {:.0f}\%".format(quantile * 100)
+
+    y_min = ds["tas_base"].min()  # for line placement
+    if np.any(threshold) or always:
+        threshold = (threshold.where(threshold) * 0) + y_min
+        ax.axhline(y_min, color="k", ls="--", lw=0.5)
+        ax.text(
+            33,
+            y_min,
+            "{}: {}/{} ({:.0f}\%)".format(
+                text,
+                np.isfinite(threshold).sum().values,
+                np.isfinite(ds["tas"]).sum().values,
+                np.isfinite(threshold).sum().values / np.isfinite(ds["tas"]).sum().values * 100
+            ),
+            va="bottom",
+        )
+        ax.plot(ds["dayofyear"], threshold, marker="s", ms=2, ls="none", color="darkred")
         ds.attrs["show_record"] = "True"
 
 
@@ -370,6 +417,7 @@ def plot_main(
     ax: plt.Axes = None,
     dpi_ratio: float = 1.2,
     language: str = "german",
+    show_exceedance: float = 1.1,
 ):
     """Main plotting function. Calls relevant subfunctions."""
     if ax is None:
@@ -378,8 +426,8 @@ def plot_main(
         )
     h1 = plot_base(ax, ds, german=language == "german")
     # show_record = True if bool(ds.attrs.get('cummean', False)) else 'always'
-    show_record = True
-    h2 = plot_target(ax, ds, show_record=show_record)
+    # show_record = True
+    h2 = plot_target(ax, ds, show_exceedance=show_exceedance)
     plot_legend(ax, [h1, h2], ds)
     plot_ccby(ax, ds)
     plt.gcf().tight_layout()
