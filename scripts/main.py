@@ -13,7 +13,7 @@ Abstract:
 import argparse
 from datetime import datetime
 
-from core.core_functions import combine_to_gif, load_plot_all
+from core.core_functions import combine_to_gif, load_plot_all, load_plot_single
 from core.utilities import regions
 
 parser = argparse.ArgumentParser(
@@ -37,6 +37,15 @@ parser.add_argument(
     help="Regions to process (by default all available regions)",
 )
 parser.add_argument(
+    "--day-of-year",
+    "-doy",
+    dest="doy",
+    type=int,
+    default=None,
+    choices=range(1, 366),
+    help="Only plot given day of the year and save in temp directory"
+)
+parser.add_argument(
     "--language",
     "-l",
     dest="language",
@@ -57,7 +66,7 @@ parser.add_argument(
     "-e",
     dest="show_exceedance",
     type=float,
-    default=1.1,
+    default=1,
     help="If in [-1, 1] show exeedances of given quantile (see docstring for interpretation of negative values)",
 )
 args = parser.parse_args()
@@ -69,14 +78,24 @@ for region in args.regions:
     print("")
     print(f"{region=}")
     print("-" * 20)
-    fn_daily, fn_cummean, fn_both = load_plot_all(
-        region=region,
-        year=year,
-        overwrite=args.overwrite,
-        language=args.language,
-        show_exceedance=args.show_exceedance,
-    )
 
-    combine_to_gif(fn_daily, stepsize=1, delay=10)
-    combine_to_gif(fn_cummean, stepsize=1, delay=10)
-    combine_to_gif(fn_both, stepsize=1, delay=10)
+    if args.doy is None:
+        fn_daily, fn_cummean, fn_both = load_plot_all(
+            region=region,
+            year=year,
+            overwrite=args.overwrite,
+            language=args.language,
+            show_exceedance=args.show_exceedance,
+        )
+
+        combine_to_gif(fn_daily, stepsize=1, delay=10)
+        combine_to_gif(fn_cummean, stepsize=1, delay=10)
+        combine_to_gif(fn_both, stepsize=1, delay=10)
+
+    else:
+        load_plot_single(
+            region=region,
+            year=year,
+            last_doy=args.doy,
+            show_exceedance=args.show_exceedance
+        )
