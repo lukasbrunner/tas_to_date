@@ -31,7 +31,7 @@ def parse_input():
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
     parser.add_argument(dest="type", type=str, choices=["daily", "cummean"])
-    parser.add_argument(dest="year", nargs="?", type=str, default="2022")
+    parser.add_argument(dest="year", nargs="?", type=str, default="2023")
     parser.add_argument(dest="doy", nargs="?", type=str, default="*")
     return parser.parse_args()
 
