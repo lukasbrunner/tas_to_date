@@ -227,6 +227,10 @@ def mark_record(ax: plt.Axes, ds: xr.Dataset, always: bool = False) -> None:
 
 def mark_exceedance(ax: plt.Axes, ds: xr.Dataset, quantile: float, always: bool = True) -> None:
     """Indicate days where the year exceeds a given percentile."""
+    year = ds.attrs["year"]
+    # remove year itself (otherwise there will be no new records for in-sample)
+    ds = ds.sel(year=ds["year"] != year)
+
     if quantile == 1:
         threshold = ds["tas"] >= ds["tas_base"].max("year")
         text = "Tage mit Hitzerekord"
