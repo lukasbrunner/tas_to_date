@@ -55,8 +55,8 @@ app_ui = ui.page_fluid(
     ),
     ui.output_plot(
         id='plot',
-        width='1066px',
-        height='600px',
+        width='1500px',
+        height='840px',
         ),
 )
 
