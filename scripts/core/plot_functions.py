@@ -238,10 +238,10 @@ def mark_exceedance(ax: plt.Axes, ds: xr.Dataset, quantile: float, always: bool 
         text = "Tage über Minimum"
     elif quantile > 0:
         threshold = ds["tas"] >= ds["tas_base"].quantile(quantile, "year")
-        text = "Tage in wärmsten {:.0f}\%".format(quantile * 100)
+        text = "Tage in wärmsten {:.0f}\%".format((1-quantile) * 100)
     else:
-        threshold = ds["tas"] <= ds["tas_base"].quantile(quantile, "year")
-        text = "Tage in kältesten {:.0f}\%".format(quantile * 100)
+        threshold = ds["tas"] <= ds["tas_base"].quantile(np.abs(quantile), "year")
+        text = "Tage in kältesten {:.0f}\%".format(np.abs(quantile) * 100)
 
     y_min = ds["tas_base"].min()  # for line placement
     if np.any(threshold) or always:
