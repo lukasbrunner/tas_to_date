@@ -81,9 +81,9 @@ def load_base(region: str) -> xr.Dataset:
     return ds
 
 
-def load_year_current(region: str) -> xr.DataArray:
+def load_year_current(year: int, region: str) -> xr.DataArray:
     """Separately load if year is current (i.e., not preprocessed)."""
-    path = os.path.join(load_path, "ERA5_nrt/2m_temperature/day/native/*.nc")
+    path = os.path.join(load_path, f"ERA5_nrt/2m_temperature/day/native/*_{year}_daily.nc")
     filenames = glob(path)
     da = xr.open_mfdataset(filenames, use_cftime=True)["t2m"]
     da = da.rename({"longitude": "lon", "latitude": "lat"})
@@ -101,7 +101,7 @@ def add_target_year(ds_base: xr.Dataset, year: int,) -> xr.Dataset:
         da = ds_base.sel(year=year, drop=True)["tas_base"]
         doy = 365
     except KeyError:
-        da = load_year_current(ds_base.attrs["region"])
+        da = load_year_current(year, ds_base.attrs["region"])
         # TODO: I think doy is always just index+1 right?
         doy = da["dayofyear"].values[np.where(np.isfinite(da.values))[0][-1]]
 
@@ -145,11 +145,14 @@ def set_last_doy(ds: xr.Dataset, doy: int) -> xr.Dataset:
     return ds
 
 
-def get_filename(ds: xr.Dataset, cummean: str, ext: str = ".jpg") -> str:
+def get_filename(ds: xr.Dataset, cummean: str, ext: str = ".jpg", tmp_dir: bool=False) -> str:
     region = ds.attrs["region"]
     year = str(ds.attrs["year"])
     doy = "{:03d}".format(ds.attrs["last_doy"])
-    path = os.path.join(plot_path, region, year, cummean)
+    if tmp_dir:
+        path = os.path.join(plot_path, 'tmp')
+    else:
+        path = os.path.join(plot_path, region, year, cummean)
     os.makedirs(path, exist_ok=True)
     fn = "_".join(["tas", cummean, region, year, doy])
     return os.path.join(path, fn + ext)
@@ -160,25 +163,24 @@ def load_plot_single(
     year: int,
     last_doy: int = None,
     dpi_ratio: float = 1.2,
-    save: bool = False,
+    save: bool = True,
     save_format: str = ".jpg",
     show_exceedance: float = 1.1,
 ):
     """Like load_plot_all but only for one day. See there for docstring."""
     ds = load_base(region)
     add_target_year(ds, year=year)
-
-    if last_doy is not None:
-        ds = set_last_doy(ds, last_doy)
-
     ds_cum = calc_cummean(ds)
     ds = calc_rank(ds)
     ds_cum = calc_rank(ds_cum)
-    breakpoint()
+
+    if last_doy is not None:
+        ds = set_last_doy(ds, last_doy)
+        ds_cum = set_last_doy(ds_cum, last_doy)
 
     plot_main(ds, dpi_ratio=dpi_ratio, show_exceedance=show_exceedance)
     if save:
-        fn = get_filename(ds, "daily", "")
+        fn = get_filename(ds, "daily", "", tmp_dir=True)
         plt.savefig(fn + save_format, dpi=72)
         # try:
         #     os.remove(fn)
@@ -191,7 +193,7 @@ def load_plot_single(
 
     plot_main(ds_cum, dpi_ratio=dpi_ratio, show_exceedance=show_exceedance)
     if save:
-        fn = get_filename(ds_cum, "cummean", "")
+        fn = get_filename(ds_cum, "cummean", "", tmp_dir=True)
         plt.savefig(fn + save_format, dpi=72)
         ds_cum.to_netcdf(fn + ".nc")
     plt.show()
@@ -238,7 +240,7 @@ def load_plot_all(
     for doy in range(1, last_doy + 1):
         print_nr = 10
         print_denom = last_doy // print_nr + 1
-        if doy % print_denom == 0:
+        if doy % print_denom == 0 or doy == last_doy:
             print(f"Processing day of year: {doy}")
         ds_sel = set_last_doy(ds, doy)
         ds_cum_sel = set_last_doy(ds_cum, doy)
@@ -251,7 +253,7 @@ def load_plot_all(
 
         fn = get_filename(ds_cum_sel, "cummean", save_format)
         if overwrite or not os.path.isfile(fn):
-            plot_main(ds_cum_sel, dpi_ratio=dpi_ratio, language=language, show_exceedance=show_exceedance)
+            plot_main(ds_cum_sel, dpi_ratio=dpi_ratio, language=language, show_exceedance=1.1)
             plt.savefig(fn, dpi=150)
             plt.close()
 
@@ -261,7 +263,7 @@ def load_plot_all(
                 2, figsize=(16 / dpi_ratio, 18 / dpi_ratio), dpi=75 * dpi_ratio
             )
             plot_main(ds_sel, ax=ax1, language=language, show_exceedance=show_exceedance)
-            plot_main(ds_cum_sel, ax=ax2, language=language, show_exceedance=show_exceedance)
+            plot_main(ds_cum_sel, ax=ax2, language=language, show_exceedance=1.1)
             plt.savefig(fn, dpi=150)
             plt.close()
 
