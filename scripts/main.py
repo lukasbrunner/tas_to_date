@@ -25,7 +25,7 @@ parser.add_argument(
     nargs="?",
     default=datetime.now().year,
     type=int,
-    help="Year to process (by defaults to current year)",
+    help="Year to process (defaults to current year)",
 )
 parser.add_argument(
     "--regions",

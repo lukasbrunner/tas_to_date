@@ -197,32 +197,54 @@ def plot_target(
     [h2] = ax.plot(ds["dayofyear"], ds["tas"], color="darkred")
     # if show_record is not None:
     #     mark_record(ax, ds, show_record == "always")
+    last_day_unseen = None
     if np.abs(show_exceedance) <= 1:
-            mark_exceedance(ax, ds, show_exceedance)
+        mark_exceedance(ax, ds, show_exceedance)
+        last_day_unseen = mark_unseen(ax, ds, show_exceedance)
     if show_rank:
-        annotate_last_day(ax, ds)
+        annotate_last_day(ax, ds, unseen=last_day_unseen)
     return h2
 
 
-def mark_record(ax: plt.Axes, ds: xr.Dataset, always: bool = False) -> None:
-    """Indicate days where the year has the maximum value."""
-    max_ = ds["tas"] >= ds["tas_base"].max("year")
-    # min_ = ds["tas"] <= ds["tas_base"].min("year")
-    # record = np.logical_or(max_, min_)
+# def mark_record(ax: plt.Axes, ds: xr.Dataset, always: bool = False) -> None:
+#     """Indicate days where the year has the maximum value."""
+#     max_ = ds["tas"] >= ds["tas_base"].max("year")
+#     # min_ = ds["tas"] <= ds["tas_base"].min("year")
+#     # record = np.logical_or(max_, min_)
+#     y_min = ds["tas_base"].min()  # for line placement
+#     if np.any(max_) or always:
+#         max_ = (max_.where(max_) * 0) + y_min
+#         ax.axhline(y_min, color="k", ls="--", lw=0.5)
+#         ax.text(
+#             33,
+#             y_min,
+#             "Tage mit Hitzerekord: {}/{}".format(
+#                 np.isfinite(max_).sum().values, np.isfinite(ds["tas"]).sum().values
+#             ),
+#             va="bottom",
+#         )
+#         ax.plot(ds["dayofyear"], max_, marker="s", ms=2, ls="none", color="darkred")
+#         ds.attrs["show_record"] = "True"
+        
+        
+def mark_unseen(ax: plt.Axes, ds: xr.Dataset, always: bool = False) -> None:
+    """Indicate days where the year has values unseen in any year or day."""
+    max_ = ds["tas"] >= ds["tas_base"].max()
     y_min = ds["tas_base"].min()  # for line placement
     if np.any(max_) or always:
+        ax.axhline(ds['tas_base'].max(), color='purple', ls=':', lw=1.)
+        ax.plot(ds["dayofyear"], ds['tas'].where(max_), color="purple")
         max_ = (max_.where(max_) * 0) + y_min
-        ax.axhline(y_min, color="k", ls="--", lw=0.5)
         ax.text(
-            33,
-            y_min,
-            "Tage mit Hitzerekord: {}/{}".format(
-                np.isfinite(max_).sum().values, np.isfinite(ds["tas"]).sum().values
-            ),
-            va="bottom",
+            5,
+            ds['tas_base'].max() * .995,
+            "Tage mit absolutem Rekord: {}".format(np.isfinite(max_).sum().values),
+            va="top",
         )
-        ax.plot(ds["dayofyear"], max_, marker="s", ms=2, ls="none", color="darkred")
-        ds.attrs["show_record"] = "True"
+        ax.plot(ds["dayofyear"], max_, marker="s", ms=2, ls="none", color="purple")
+        ds.attrs["show_unseen"] = "True"
+        return max_
+    return None
 
 
 def mark_exceedance(ax: plt.Axes, ds: xr.Dataset, quantile: float, always: bool = True) -> None:
@@ -266,7 +288,7 @@ def mark_exceedance(ax: plt.Axes, ds: xr.Dataset, quantile: float, always: bool 
         ds.attrs["show_record"] = "True"
 
 
-def annotate_last_day(ax: plt.Axes, ds: xr.Dataset) -> None:
+def annotate_last_day(ax: plt.Axes, ds: xr.Dataset, unseen: xr.DataArray=None) -> None:
     """Plot the anomaly and rank of the last available day of year."""
     year = ds.attrs["year"]
     doy_last = ds.attrs["last_doy"]
@@ -280,6 +302,12 @@ def annotate_last_day(ax: plt.Axes, ds: xr.Dataset) -> None:
     # print(middle)
 
     text = f"{anom_last:+.1f}$^\\circ$C\n{rank_last}/{rank_total}"
+    
+    color = 'darkred'
+    if unseen is not None:
+        unseen_last = unseen.sel(dayofyear=doy_last, drop=True).values
+        if np.isfinite(unseen_last):
+            color = 'purple'
 
     if doy_last > 321:  # adjust possition to avoid running out the plot
         x_pos = 360
@@ -294,12 +322,12 @@ def annotate_last_day(ax: plt.Axes, ds: xr.Dataset) -> None:
         ha = "left"
         va = "center"
 
-    ax.vlines(doy_last, ds_last["tas"], middle, colors="darkred", ls=":", lw=1)
+    ax.vlines(doy_last, ds_last["tas"], middle, colors=color, ls=":", lw=1)
     ax.text(
         x_pos,
         y_pos,
         text,
-        color="darkred",
+        color=color,
         ha=ha,
         va=va,
         multialignment="left",
@@ -413,7 +441,9 @@ def plot_legend(ax: plt.Axes, handles: list, ds: xr.Dataset):
         -1
     ].values
     years = "{}-{}".format(year_start, year_end)
-    ax.legend(handles, [years, ds.attrs["year"]], loc="upper left")
+    # ax.legend(handles, [years, ds.attrs["year"]], loc="upper left")
+    # box: x, y, width, height
+    ax.legend(handles, [years, ds.attrs["year"]], loc="best", bbox_to_anchor=(0, .2, .4, .6))
 
 
 def plot_main(
